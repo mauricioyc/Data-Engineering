@@ -1,0 +1,5 @@
+.vscode
+env_labs
+*pycache*
+*.egg
+*.ipynb_checkpoints
