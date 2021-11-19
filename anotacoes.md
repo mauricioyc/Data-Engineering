@@ -28,7 +28,7 @@ Data Engineers stores and process data.
 
 # 1 Data Modeling
 
-## 1.1 Relational Data Models
+## **1.1 Relational Data Models**
 
 More consistency and centered configuration.
 
@@ -110,7 +110,7 @@ Dimensions is parent of multiple child tables, similarly to a star schema with m
 https://www.postgresqltutorial.com/postgresql-upsert/
 https://www.postgresql.org/docs/9.5/sql-insert.html
 
-## 1.2 Non Relation Data Models
+## **1.2 Non Relation Data Models**
 
 Less restricted and scalable approach.
 
@@ -122,10 +122,44 @@ Less restricted and scalable approach.
 - Store different data type formats
 - Distributed users (low latency)
 
-### 1.2.1 Apache Cassandra
+### 1.2.1 Distributed Database
+
+Copied data in multiple machines to provide `high availability` and redundancy. It makes the data have `eventual consistency`, because it is complex to update redundant data.
+
+### 1.2.2 CAP Theorem
+
+Consistency: every read returns the latest and correct data.
+Availability: every request is answered.
+Partitioning Tolerance: the system continues to work even with node failure. 
+
+### 1.2.3 Apache Cassandra
+CAP -> AP system, it sacrifices consistency in critical situations.
+
 - Keyspace: collection of tables
 - Table: A group of partitions
 - Rows: single items
 - Partition: fundamental unit, collection of rows and how the data is distributed
 - Primary key: partitioning key + clustering columns
 - Columns: clustering and data, labeled element
+
+#### 1.2.3.1 Data Modeling with Cassandra
+
+`Query first`: **there are no joins or group by** in Apache Cassandra, thus `denormalization` is critical. You need to know a priori the queries you are going to perform in the data.
+
+`One table per query`: creating a table for specific query is a good strategy. Usually HD space is cheap.
+
+#### 1.2.3.2 Primary Key in Cassandra
+
+Primary key is a unique key that can be comprised of a partition key and clustering key.
+Tip: try to evenly distribute the data in the partition key.
+
+#### 1.2.3.3 Clustering Columns
+
+`Primary Key = Partitioning Key + (optional) Clustering Column`
+
+The clustering column sorts the data in ascending order.
+
+#### 1.2.3.4 Where Clause
+
+A where clause must be included in Cassandra, unless a `ALLOW FILTERING` setting is provided, which is not recommended. A non primary key column cant be queried in a where clause.
+
