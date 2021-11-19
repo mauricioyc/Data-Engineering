@@ -1,10 +1,10 @@
 # Introduction
 
-> Get feedback from GitHub, CV, LinkedIn and cover letter.
+This file contains my class notes from the Udacity Data Engineering Nanodegree.
 
 ## What is Data engineering
 
-Taking raw data and cleaning it for whoever needs to use it
+Taking raw data and cleaning it for whoever needs to use it.
 
 ## Data Hierarchy
 
@@ -163,3 +163,4 @@ The clustering column sorts the data in ascending order.
 
 A where clause must be included in Cassandra, unless a `ALLOW FILTERING` setting is provided, which is not recommended. A non primary key column cant be queried in a where clause.
 
+# 2 Cloud Data Warehouses
