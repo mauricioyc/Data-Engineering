@@ -2,7 +2,7 @@
 
 ## About The Project
 
-This project creates the database in Apache Cassandra for the Sparkify fictitious music streaming app. The Analytics team wants to explore user and music preferences by answering specific business questions. The data is modelled around the business necessity to optimize these possible queries.
+This project creates the database in Apache Cassandra for the Sparkify mock music streaming app. The Analytics team wants to explore user and music preferences by answering specific business questions. The data is modeled around the business necessity to optimize these possible queries.
 
 ## Source Data
 

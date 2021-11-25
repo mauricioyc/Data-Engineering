@@ -2,7 +2,7 @@
 
 ## About The Project
 
-This project creates the database design in PostgresSQL for the Sparkify fictitious client usage. This database consists of song and song play data in the music app in the schema below. 
+This project creates the database design in PostgresSQL for the Sparkify mock client usage. This database consists of song and song play data in the music app in the schema below. 
 
 ## Database Schema
 
