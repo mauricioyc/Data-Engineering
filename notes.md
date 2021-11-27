@@ -328,3 +328,5 @@ In Redshift, it is highly recommended to use COPY statement in split compressed 
 
 - Sort key is defined in the loading of the table. The sorting key is loaded sorted.
 - Speeds up highly requested columns which are usually sorted, such as data.
+
+# 3 Data Lakes with Spark
