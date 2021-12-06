@@ -330,3 +330,96 @@ In Redshift, it is highly recommended to use COPY statement in split compressed 
 - Speeds up highly requested columns which are usually sorted, such as data.
 
 # 3 Data Lakes with Spark
+
+## 3.1 Introduction to Big Data
+
+Big numbers of processing and reading time.
+
+- CPU: 0.4 ns
+- RAM: 100 ns
+- SSD Read: 16 micros
+- Network: 150 ms
+
+CPU 200x> Memory 15x> SSD 13x> HD speed
+
+Network: the data in the clusters need to be shuffled. Tools such as Spark tries to minimize shuffling since network data transfer is often a bottleneck.
+
+### 3.1.1 Hadoop Ecosystem
+
+Consist in 4 main components:
+
+- HDFS: distributed data storage.
+- Map Reduce: large scale data processing.
+- YARN: resource manager for the jobs across the cluster.
+- Hadoop Common: utilities.
+
+Example of tools:
+
+- Pig: SQL like for map reduce.
+- Hive: another SQL like for map reduce.
+- Spark: fast memory computation for map reduce.
+- Storm: streaming data.
+- Flink: streaming data.
+
+#### 3.1.2 Map Reduce
+
+HDFS (split data in partitions) > 
+
+MAP (transform the partitions in key value tuples) > 
+
+Shuffle (organize the data by the keys to be in same machine) > 
+
+Reduce (operation in the key value tuple, for example sum)
+
+## 3.2 Spark
+
+Spark is optimized to use memory efficiently and work on large datasets in a distributed system.
+
+Modes:
+
+- Standalone for testing and prototype.
+- YARN cluster resource manager.
+- Mesos cluster resource manager.
+
+Use cases:
+
+- ETL.
+- Machine Learning.
+- Data Streaming.
+- Graph Analytics.
+
+### 3.2.1 Functional Programming: Spark Scala
+
+Functional programming. Sparks is made in Scala, different from procedural programming like Python, Scala is more strict in the function specifications and is perfect for distributed programming.
+
+The main quality of the functional programming in a distributed system is its ability to preserve inputs and not set global variables, preserving the functions.
+
+### 3.2.2 Spark Characteristics
+
+- Lazy evaluation with DAGs.
+- SQL or Python runs by a query optimizer called catalyst that are transformed into a DAG
+
+Spark is RDD (Resilient Distributed Dataset):
+
+- Memory
+- Distributed
+- Datasets
+
+Spark uses accumulators to store global variables.
+
+## 3.3 Data Lakes
+
+Empowered by Big Data technologies. It gives higher flexibility to the data teams to explore closer to raw data.
+
+A important step is to infer schema from from some standard data formats.
+
+### 3.3.1 DW vs Data Lake
+
+DW: high cost, strict format, high consistency, tabular data
+Data Lake: low cost, lose format, exploratory and diverse data, scalable and parallel infrastructure
+
+### 3.3.2 Data Lake Challenges
+
+Garbage Dump: it is hard to define a minimum quality for the data in the lake.
+Data Governance: it is hard to separate access by role in a data lake.
+Dimensional Modeling: it is hard to define where the Lake and the DW should coexist. 
