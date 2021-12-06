@@ -208,7 +208,7 @@ songplay_table_insert = ("""
 
 user_table_insert = ("""
     INSERT INTO users (
-        SELECT DISTINCT 
+        SELECT DISTINCT
                e.userId    as user_id
              , e.firstName as first_name
              , e.lastName  as last_name

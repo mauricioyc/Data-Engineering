@@ -66,6 +66,7 @@ def process_song_data(spark, input_data, output_data):
              , s.duration  as duration
         FROM song_data s
         WHERE s.song_id IS NOT NULL
+              AND s.artist_id IS NOT NULL
     """)
 
     # write songs table to parquet files partitioned by year and artist
@@ -140,11 +141,11 @@ def process_log_data(spark, input_data, output_data):
     # extract columns for users table
     users_table = spark.sql("""
         SELECT DISTINCT
-               e.userId    as user_id
-             , e.firstName as first_name
-             , e.lastName  as last_name
-             , e.gender    as gender
-             , e.level     as level
+               CAST(e.userId as BIGINT) as user_id
+             , e.firstName              as first_name
+             , e.lastName               as last_name
+             , e.gender                 as gender
+             , e.level                  as level
         FROM log_data e
         WHERE e.userId IS NOT NULL
     """)
@@ -157,12 +158,12 @@ def process_log_data(spark, input_data, output_data):
     # extract columns to create time table
     time_table = spark.sql("""
         SELECT DISTINCT
-               e.datetime           as start_time
-             , hour(datetime)       as hour
-             , day(datetime)        as day
-             , weekofyear(datetime) as week
-             , dayofmonth(datetime) as month
-             , year(datetime)       as year
+               CAST(e.datetime as TIMESTAMP) as start_time
+             , hour(datetime)                as hour
+             , day(datetime)                 as day
+             , weekofyear(datetime)          as week
+             , dayofmonth(datetime)          as month
+             , year(datetime)                as year
              , CASE WHEN dayofweek(datetime) in (1,7)
                     THEN FALSE ELSE TRUE END as weekday
         FROM log_data e
@@ -202,14 +203,14 @@ def process_log_data(spark, input_data, output_data):
         SELECT DISTINCT
                ROW_NUMBER() OVER
                     (ORDER BY monotonically_increasing_id()) as songplay_id
-             , e.datetime  as start_time
-             , e.userId    as user_id
-             , e.level     as level
-             , s.song_id   as song_id
-             , s.artist_id as artist_id
-             , e.sessionId as session_id
-             , e.location  as location
-             , e.userAgent as user_agent
+             , CAST(e.datetime as TIMESTAMP) as start_time
+             , CAST(e.userId as BIGINT)      as user_id
+             , e.level                       as level
+             , s.song_id                     as song_id
+             , s.artist_id                   as artist_id
+             , e.sessionId                   as session_id
+             , e.location                    as location
+             , e.userAgent                   as user_agent
         FROM log_data e
         JOIN song_data s ON (
             lower(e.artist) = lower(s.artist_name)
