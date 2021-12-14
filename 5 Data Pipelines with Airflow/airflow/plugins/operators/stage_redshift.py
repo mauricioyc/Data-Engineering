@@ -109,7 +109,7 @@ class StageToRedshiftOperator(BaseOperator):
         else:
             self.log.info(
                 "Clearing data from stage destination Redshift table")
-            redshift.run(f"DELETE FROM {self.table}")
+            redshift.run(f"TRUNCATE {self.table}")
 
         self.log.info("Copying data from S3 to Redshift")
         rendered_key = self.s3_key.format(**context)

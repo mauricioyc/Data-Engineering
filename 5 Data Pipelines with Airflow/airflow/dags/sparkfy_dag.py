@@ -31,7 +31,8 @@ dag = DAG(dag_identifier,
           default_args=default_args,
           description='Load and transform data in Redshift with Airflow',
           schedule_interval="0 * * * *",
-          max_active_runs=1
+          max_active_runs=1,
+          catchup=False
           )
 
 # dummy start task
