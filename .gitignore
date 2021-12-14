@@ -1,6 +1,7 @@
 .vscode
 env_labs
 *pycache*
+*__pycache__*
 *.egg
 *.ipynb_checkpoints
 *.cfg
