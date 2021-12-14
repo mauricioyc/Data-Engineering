@@ -423,3 +423,83 @@ Data Lake: low cost, lose format, exploratory and diverse data, scalable and par
 Garbage Dump: it is hard to define a minimum quality for the data in the lake.
 Data Governance: it is hard to separate access by role in a data lake.
 Dimensional Modeling: it is hard to define where the Lake and the DW should coexist. 
+
+# 4 Data Pipelines
+
+Data pipeline is a series of steps to process data. In general, it is used to create analytical data.
+
+Process in a data pipeline:
+
+- Data validation: ensure quality of the data, guarantee it is correct
+- DAGs: it is very common to create data pipelines in directed acyclic graphs that are a special type of graph that does not have path that "cycles back" to a previous node.
+
+## 4.1 Airflow
+
+Airflow is a commonly used DAG based schedulable data pipeline tool that is easy to deploy in local or cloud environments.
+
+Airflow is comprised by:
+
+- Scheduler: orchestrate job executions.
+- Queue: holds the stats of DAGs and Tasks.
+- Worker: execute the tasks in the DAGs.
+- Web Server: dashboard interface for visual control.
+
+Instantiated Operators as considered Tasks.
+
+### 4.1.1 Airflow Hooks
+
+Hooks, allows users to manage connection and configuration of DAGs to external systems. There are many hooks out off the box in Airflow, such as `PostgresHook` for Redshift.
+
+## 4.2 Data Quality
+
+Data lineage is the steps of the data processing from the origin to the final destination. It is important to be able to show where the data comes from and how it is calculated to affirm data correctness and build trust with the data users.
+
+### 4.2.1 Scheduled Data Processing
+
+Schedules determine the period the data is analyzed. The naïve approach would be to analyze the whole data at all time. A better approach is to benefit from partitions and run schedules based on the size, periods and partitions of the data.
+
+### 4.2.2 Data Partitioning in Data Pipelines
+
+Partition often leads to more reliable data pipelines. Partitions can be any attribute and is usually based in dates.
+
+Types of Partitioning:
+- Logical: divide by conceptually related data.
+- Size: limits data by the size (fill buckets of a given size).
+- Location: separate by location is usually optimal for data analysis.
+- Time: periods and dates usually are normally distributed.
+
+Partition makes data have less dependency between each partition, making possible parallelizing the process.
+
+### 4.2.3 Measure Data Quality
+
+There must be requirements to meet data consumers quality. For example:
+
+- Data size.
+- Accuracy for a certain measure.
+- Data source must be within a given timeframe.
+- Check if a pipeline fails.
+- No sensitive information.
+
+## 4.3 Production Data Pipelines
+
+- Reuse useful code. 
+- Build custom Operators.
+- Build custom hooks to access common APIs
+
+In a data pipeline, it is a good practice to allow each task to be responsible for only one job it makes easier to abstract, understand, debug, parallelize and reuse the task.
+
+### 4.3.1 Sub DAGs
+
+Repeated tasks can be used in a sub DAG to:
+- Shorten the code.
+- Abstract DAG goal.
+- Facilitate bug fixes.
+
+On the other hand it:
+- Makes the small steps in the pipeline less visible.
+- Harder to understand.
+- DAG architecture has to be thought from the start.
+
+### 4.3.2 Monitoring
+
+It is possible to integrate Airflow with Statsd and Grafana for easy task report. Also it is possible to set up email triggers and set SLAs to guarantee missed time schedule.
