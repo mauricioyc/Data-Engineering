@@ -58,7 +58,7 @@ class MtgJsonOperator(BaseOperator):
             compression = None
             logging.info("Saving json to temporary file...")
 
-        df.to_csv(filename, compression=compression)
+        df.to_csv(filename, compression=compression, index=False)
 
     @staticmethod
     def create_pandas_df(file_type, data):
@@ -77,14 +77,14 @@ class MtgJsonOperator(BaseOperator):
             df = df[~df.card_type.isin(['USD', 'EUR'])]
             df["currency"] = df.store.map(currency)
         else:
-            columns = ['card_id', 'name', 'edition']
+            columns = ['card_id', 'name', 'collector_number', 'edition']
 
             df = pd.DataFrame(columns=columns)
             for edition in data:
                 cards = data.get(edition).get('cards')
                 if(len(cards) > 0):
                     aux = pd.DataFrame(cards)
-                    aux = aux[['uuid', 'name']]
+                    aux = aux[['uuid', 'name', 'number']]
                     aux['edition'] = edition
                     aux.columns = columns
                     df = pd.concat([df, aux], axis=0)
