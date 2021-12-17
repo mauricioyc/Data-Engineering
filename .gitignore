@@ -6,3 +6,7 @@ env_labs
 *.ipynb_checkpoints
 *.cfg
 4 Data Lake with Spark/data/*
+6 Magic DB Project/airflow/data/*
+teste*.ipynb
+*.json
+*.gz
