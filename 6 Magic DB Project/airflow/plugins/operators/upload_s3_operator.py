@@ -14,7 +14,7 @@ class UploadS3Operator(BaseOperator):
     template_fields = ('download_link', 's3_bucket', 's3_key', 'filename',)
     template_ext = ()
 
-    ui_color = '#f4a460'
+    ui_color = '#f4A460'
 
     @apply_defaults
     def __init__(self,
@@ -24,6 +24,7 @@ class UploadS3Operator(BaseOperator):
                  s3_key='',
                  filename='',
                  gzip_flag=False,
+                 is_scryfall=False,
                  * args, **kwargs):
 
         super(UploadS3Operator, self).__init__(*args, **kwargs)
@@ -32,6 +33,7 @@ class UploadS3Operator(BaseOperator):
         self.s3_bucket = s3_bucket
         self.s3_key = s3_key
         self.gzip_flag = gzip_flag
+        self.is_scryfall = is_scryfall
         if(gzip_flag):
             self.filename = filename + '.gz'
 
@@ -61,21 +63,51 @@ class UploadS3Operator(BaseOperator):
             try:
                 logging.info(f"Downloading from link: {self.download_link}")
                 response = requests.get(self.download_link)
-
             except Exception as e:
                 logging.error(e)
                 raise
 
             if(self.gzip_flag):
                 logging.info("Compressing and saving temporary file...")
-                with gzip.open(self.filename, 'wt') as file:
-                    json.dump(response.json(), file)
+                if(self.is_scryfall):
+                    logging.info("Editing file from Scryfall...")
+                    response = [self.select_columns(
+                        data) for data in response.json()]
+                    for line in response:
+                        with gzip.open(self.filename, "at", encoding='utf-8') as file:  # noqa
+                            string = json.dumps(line, ensure_ascii=False)
+                            file.write(string + "\n")
+                else:
+                    with gzip.open(self.filename, 'wt') as file:
+                        json.dump(response.json(), file)
 
             else:
-                logging.info("Saving json to temporary file...")
-                with open(self.filename, 'w', encoding='utf-8') as file:
-                    json.dump(response.json(), file)
+                if(self.is_scryfall):
+                    for line in response:
+                        with open(self.filename, "a", encoding='utf-8') as file:  # noqa
+                            string = json.dumps(line, ensure_ascii=False)
+                            file.write(string + "\n")
+                else:
+                    logging.info("Saving json to temporary file...")
+                    with open(self.filename, 'w', encoding='utf-8') as file:
+                        json.dump(response.json(), file)
             return(True)
+
+    @staticmethod
+    def select_columns(data):
+        field_list = ['id', 'name', 'lang', 'released_at', 'layout',
+                      'mana_cost', 'cmc', 'type_line', 'oracle_text', 'power',
+                      'toughness', 'colors', 'color_identity', 'keywords',
+                      'legalities', 'reserved', 'foil', 'nonfoil', 'oversized',
+                      'promo', 'reprint', 'variation', 'set_id', 'set',
+                      'set_name', 'set_type', 'collector_number', 'digital',
+                      'rarity', 'artist', 'artist_ids', 'border_color',
+                      'frame', 'full_art', 'textless', 'booster',
+                      'story_spotlight', 'printed_name', 'printed_type_line',
+                      'printed_text', 'security_stamp', 'loyalty', 'watermark',
+                      'produced_mana', 'color_indicator', 'tcgplayer_etched_id',
+                      'content_warning', 'life_modifier', 'hand_modifier']
+        return({key: data.get(key) for key in field_list})
 
     def execute(self, context):
         s3_hook = S3Hook(aws_conn_id=self.aws_conn_id)

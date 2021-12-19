@@ -10,7 +10,7 @@ class HttpOperator(BaseOperator):
     template_fields = ('endpoint', 'data', 'headers',)
     template_ext = ()
 
-    ui_color = '#f4a460'
+    ui_color = '#E83845'
 
     @apply_defaults
     def __init__(self,

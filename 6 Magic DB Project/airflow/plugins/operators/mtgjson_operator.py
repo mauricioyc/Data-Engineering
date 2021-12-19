@@ -15,7 +15,7 @@ class MtgJsonOperator(BaseOperator):
     template_fields = ('download_link', 's3_bucket', 's3_key', 'filename',)
     template_ext = ()
 
-    ui_color = '#f4a460'
+    ui_color = '#288BA8'
 
     @apply_defaults
     def __init__(self,
