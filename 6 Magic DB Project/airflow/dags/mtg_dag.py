@@ -3,6 +3,7 @@ import os
 from datetime import datetime, timedelta
 
 from airflow import DAG
+from airflow.models import Variable
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.mtg_plugin import (HttpOperator, LoadDimensionOperator,
                                           LoadFactOperator, MtgJsonOperator,
@@ -40,7 +41,7 @@ user_macros = {
 
 # AWS parameters
 aws_credentials = 'aws_credentials'
-s3_bucket = 'magic-db-project'
+s3_bucket = Variable.get("s3_bucket")  # 'magic-db-project'
 s3_key_template = '{main_folder}/{{{{ next_execution_date.year  }}}}/{{{{ next_execution_date.month  }}}}/{{{{ next_execution_date.day  }}}}/'  # noqa
 filename_template = '{file_name}_{{{{ next_execution_date.year  }}}}_{{{{ next_execution_date.month  }}}}_{{{{ next_execution_date.day  }}}}.{extension}'  # noqa
 
@@ -63,7 +64,7 @@ default_args = {
     "start_date": start_date,
     "email_on_failure": False,
     "email_on_retry": False,
-    # "retry": 2,
+    "retry": 2,
     "retry_delay": timedelta(minutes=5),
 }
 
@@ -230,6 +231,10 @@ load_time_table = LoadDimensionOperator(
     sql_query=SqlQueries.time_table_insert,
     redshift_conn_id="redshift"
 )
+
+# ========= #
+#    FACT   #
+# ========= #
 load_prices_table = LoadFactOperator(
     task_id='load_prices_fact_table',
     dag=dag,

@@ -69,14 +69,22 @@ class SqlQueries:
             SELECT 2 UNION ALL
             SELECT 3
         )
-        SELECT DISTINCT TRIM(SPLIT_PART(REPLACE(REPLACE(REPLACE(B.artist_ids, '[', ''), ']', ''), '"', ''), ',', NS.n)) AS artist_id
-             , TRIM(SPLIT_PART(B.artist, '&', NS.n)) as artist_name
-        FROM NS
-        INNER JOIN (
-            SELECT artist
-                 , artist_ids
-            FROM staging_scryfall
-        ) B ON NS.n <= json_array_length(B.artist_ids, true)
+        , aux_artists as (
+            SELECT DISTINCT TRIM(SPLIT_PART(REPLACE(REPLACE(REPLACE(B.artist_ids, '[', ''), ']', ''), '"', ''), ',', NS.n)) AS artist_id
+                , TRIM(SPLIT_PART(B.artist, '&', NS.n)) as artist
+            FROM NS
+            INNER JOIN (
+                SELECT artist
+                    , artist_ids
+                FROM staging_scryfall
+            ) B ON NS.n <= json_array_length(B.artist_ids, true)
+        )
+
+        SELECT DISTINCT artist_id
+             , LAST_VALUE(artist) OVER(PARTITION BY artist_id ORDER BY
+                        artist ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED
+                        FOLLOWING) as artist
+        FROM aux_artists
     """)
 
     time_table_insert = ("""

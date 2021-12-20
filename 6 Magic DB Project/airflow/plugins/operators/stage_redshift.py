@@ -1,3 +1,4 @@
+import logging
 import os
 
 from airflow.contrib.hooks.aws_hook import AwsHook
@@ -35,7 +36,7 @@ class StageToRedshiftOperator(BaseOperator):
             context variables to perform partitioning load.
         aws_credentials_id (str): AWS credentials from Airflow context keyword.
         aws_region (str): AWS region of the data source.
-        json_format (str): JSON manifest location to format data.
+        file_format (str): File format to be coppied.
         time_format (str): Timestampo format to format data.
         *args: Arbitrary argument list.
         **kwargs: Arbitrary keyword arguments.
@@ -101,7 +102,7 @@ class StageToRedshiftOperator(BaseOperator):
         credentials = aws_hook.get_credentials()
         redshift = PostgresHook(postgres_conn_id=self.redshift_conn_id)
 
-        self.log.info("Checking if table exists")
+        logging.info("Checking if table exists")
         records = redshift.get_records(
             f"""SELECT 1 FROM pg_tables
                 WHERE schemaname='{self.schema}'
@@ -111,11 +112,12 @@ class StageToRedshiftOperator(BaseOperator):
             raise ValueError(
                 f"Could not find {self.schema}.{self.table} in Redshift")
         else:
-            self.log.info(
+            logging.info(
                 "Clearing data from stage destination Redshift table")
+            logging.info(f"TRUNCATE {self.table}")
             redshift.run(f"TRUNCATE {self.table}")
 
-        self.log.info("Copying data from S3 to Redshift")
+        logging.info("Copying data from S3 to Redshift")
         rendered_key = self.s3_key.format(**context)
         json_path = os.path.join(
             f"s3://{self.s3_bucket}", f"{rendered_key}")

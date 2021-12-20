@@ -10,7 +10,49 @@ from airflow.utils.decorators import apply_defaults
 
 
 class UploadS3Operator(BaseOperator):
+    """
+    Uploads a local file to S3 and delete it. If the files already exists in S3
+    nothing is done. In the case that the file to be uploaded is from Scryfall.
+    A transformation in the JSON is done to be record wise.
 
+    Args:
+        download_link (str): Link to download the data.
+        aws_conn_id (str): AWS connection name from Airflow
+            context keyword.
+        s3_bucket (str): Bucket name of the data source.
+        s3_key (str): Key of files in the source bucket. It is possible to pass
+            context variables to perform partitioning load.
+        redshift_conn_id (str): Redshift connection name from Airflow
+            context keyword.
+        filename (str): filename to be saved in S3. If gzip is used, '.gz'
+            is concatenated in the end of the file. This filename is also
+            used to check if it exists in S3.
+        gzip_flag (boolean): if True, the file is gzipped before saving
+            locally.
+        is_scryfall (boolean): Checks if the file to be uploaded is from
+            Skyfall.
+        *args: Arbitrary argument list.
+        **kwargs: Arbitrary keyword arguments.
+
+    Attributes:
+        download_link (str): Link to download the data.
+        aws_conn_id (str): AWS connection name from Airflow
+            context keyword.
+        s3_bucket (str): Bucket name of the data source.
+        s3_key (str): Key of files in the source bucket. It is possible to pass
+            context variables to perform partitioning load.
+        redshift_conn_id (str): Redshift connection name from Airflow
+            context keyword.
+        filename (str): filename to be saved in S3. If gzip is used, '.gz'
+            is concatenated in the end of the file. This filename is also
+            used to check if it exists in S3.
+        gzip_flag (boolean): if True, the file is gzipped before saving
+            locally.
+        is_scryfall (boolean): Checks if the file to be uploaded is from
+            Skyfall.
+        *args: Arbitrary argument list.
+        **kwargs: Arbitrary keyword arguments.
+    """
     template_fields = ('download_link', 's3_bucket', 's3_key', 'filename',)
     template_ext = ()
 
@@ -41,6 +83,13 @@ class UploadS3Operator(BaseOperator):
             self.filename = filename
 
     def check_if_file_exists(self, s3_hook, filename):
+        """
+        Check if file exists in S3.
+
+        Args:
+            s3_hook (obj): S3 Hook object.
+            filename (str): filename to be checked in S3.
+        """
         logging.info(
             f'Checking files in bucket: {self.s3_bucket} with prefix: {self.s3_key}...')  # noqa
 
@@ -53,7 +102,13 @@ class UploadS3Operator(BaseOperator):
             return(False)
 
     def download_file(self, s3_hook):
+        """
+        Download a file if a download link is passed. If the file passed is
+        form Scryfall, a transformation is applied.
 
+        Args:
+            s3_hook (obj): S3 Hook object.
+        """
         if(self.check_if_file_exists(s3_hook, self.filename)):
             logging.info(
                 f"File {os.path.join(self.s3_key, self.filename)} already exists. Skipping download...")  # noqa
@@ -95,6 +150,12 @@ class UploadS3Operator(BaseOperator):
 
     @staticmethod
     def select_columns(data):
+        """
+        Columns of Scryfall data to be filtered.
+
+        Args:
+            data (dict): Dictionary with the data to be filtered.
+        """
         field_list = ['id', 'name', 'lang', 'released_at', 'layout',
                       'mana_cost', 'cmc', 'type_line', 'oracle_text', 'power',
                       'toughness', 'colors', 'color_identity', 'keywords',
@@ -105,11 +166,20 @@ class UploadS3Operator(BaseOperator):
                       'frame', 'full_art', 'textless', 'booster',
                       'story_spotlight', 'printed_name', 'printed_type_line',
                       'printed_text', 'security_stamp', 'loyalty', 'watermark',
-                      'produced_mana', 'color_indicator', 'tcgplayer_etched_id',
-                      'content_warning', 'life_modifier', 'hand_modifier']
+                      'produced_mana', 'color_indicator',
+                      'tcgplayer_etched_id', 'content_warning',
+                      'life_modifier', 'hand_modifier']
         return({key: data.get(key) for key in field_list})
 
     def execute(self, context):
+        """
+        Creates a S3 Hook, if a download link is passed, the file is
+        downloaded and uploaded to S3. If a download link is not passed, it
+        tries to upload a file locally with the given filename.
+
+        Args:
+            context (obj): context from run enviroment.
+        """
         s3_hook = S3Hook(aws_conn_id=self.aws_conn_id)
 
         if(self.download_link):

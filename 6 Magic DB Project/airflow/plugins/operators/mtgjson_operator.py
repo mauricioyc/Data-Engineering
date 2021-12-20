@@ -11,7 +11,51 @@ from airflow.utils.decorators import apply_defaults
 
 
 class MtgJsonOperator(BaseOperator):
+    """
+    From a giving download link, checks if the file to be downloaded exists in
+    S3. If not exists, the file is transformed and downloaded locally. If it
+    exists, nothing is done.
 
+    Args:
+        download_link (str): Link to download the data.
+        aws_conn_id (str): AWS connection name from Airflow
+            context keyword.
+        s3_bucket (str): Bucket name of the data source.
+        s3_key (str): Key of files in the source bucket. It is possible to pass
+            context variables to perform partitioning load.
+        redshift_conn_id (str): Redshift connection name from Airflow
+            context keyword.
+        filename (str): filename to be saved locally. If gzip is used, '.gz'
+            is concatenated in the end of the file. This filename is also
+            used to check if it exists in S3.
+        df_type (str): type of the data to be saved locally. If prices, the
+            respective transformation is applied, else the transformation for
+            printings is applied.
+        gzip_flag (boolean): if True, the file is gzipped before saving
+            locally.
+        *args: Arbitrary argument list.
+        **kwargs: Arbitrary keyword arguments.
+
+    Attributes:
+        download_link (str): Link to download the data.
+        aws_conn_id (str): AWS connection name from Airflow
+            context keyword.
+        s3_bucket (str): Bucket name of the data source.
+        s3_key (str): Key of files in the source bucket. It is possible to pass
+            context variables to perform partitioning load.
+        redshift_conn_id (str): Redshift connection name from Airflow
+            context keyword.
+        filename (str): filename to be saved locally. If gzip is used, '.gz'
+            is concatenated in the end of the file. This filename is also
+            used to check if it exists in S3.
+        df_type (str): type of the data to be saved locally. If prices, the
+            respective transformation is applied, else the transformation for
+            printings is applied.
+        gzip_flag (boolean): if True, the file is gzipped before saving
+            locally.
+        *args: Arbitrary argument list.
+        **kwargs: Arbitrary keyword arguments.
+    """
     template_fields = ('download_link', 's3_bucket', 's3_key', 'filename',)
     template_ext = ()
 
@@ -41,6 +85,12 @@ class MtgJsonOperator(BaseOperator):
             self.filename = filename
 
     def download_file(self, download_link):
+        """
+        Get response from download link.
+
+        Args:
+            download_link (str): Link to download the data.
+        """
         try:
             logging.info(f"Downloading from link: {download_link}")
             response = requests.get(download_link)
@@ -51,6 +101,14 @@ class MtgJsonOperator(BaseOperator):
             raise
 
     def save_file(self, df, filename):
+        """
+        Save df locally. If gzip_flag is True, the file is compressed before
+        saving.
+
+        Args:
+            df (DataFrame): Pandas DataFrame to be saved as CSV locally.
+                filename (str): name of the CSV.
+        """
         if(self.gzip_flag):
             compression = 'gzip'
             logging.info("Compressing and saving temporary file...")
@@ -62,6 +120,17 @@ class MtgJsonOperator(BaseOperator):
 
     @staticmethod
     def create_pandas_df(file_type, data):
+        """
+        Transforms the response data in a dict format to a Pandas DataFrame.
+        If the data is for the 'prices' table, the transformation unnests the
+        data in the correspoding columns. Otherwise, if takes the 'prints' data
+        and filters only the necessary keys to be created in the DataFrame.
+
+        Args:
+            file_type (str): Can be 'prices' or 'prints'. If prices, transforms
+                the DataFrame respectively.
+            data (dict): data to be parsed into a Pandas DataFrame.
+        """
         if(file_type == 'prices'):
             currency = {
                 'tcgplayer':  'USD',
@@ -93,6 +162,14 @@ class MtgJsonOperator(BaseOperator):
 
     @staticmethod
     def flattenDict(d, join=add, lift=lambda x: (x,)):
+        """
+        Unnest a dicitionary into records.
+
+        Args:
+            d (dict): Dictionary to be unnested.
+            join (dict): method to join the unnested data.
+            lift (obj): function to concatenate the unnested data.
+        """
         results = []
         _FLAG_FIRST = object()
 
@@ -108,6 +185,12 @@ class MtgJsonOperator(BaseOperator):
         return results
 
     def check_if_file_exists(self, filename):
+        """
+        Checks if file exists in S3.
+
+        Args:
+            filename (str): Filename to be checked if exists in S3.
+        """
         s3_hook = S3Hook(aws_conn_id=self.aws_conn_id)
 
         logging.info(
@@ -122,7 +205,13 @@ class MtgJsonOperator(BaseOperator):
             return(False)
 
     def execute(self, context):
+        """
+        Check if file exists in S3, get file response from download link,
+        transforms it into a Pandas DataFrame and saves locally.
 
+        Args:
+            context (obj): context from run enviroment.
+        """
         if(self.check_if_file_exists(self.filename)):
             logging.info(
                 f"File {os.path.join(self.s3_key, self.filename)} already exists. Skipping download...")  # noqa

@@ -88,12 +88,21 @@ The project is run in Airflow. It is important to configure Airflow as follows:
     Password: your_user_secret
     Port: 5439
     ```
+    
+- Create Variable:
+
+    S3 Bucket: 
+    ```
+    name: s3_bucket
+    value: your_bucket_name
 
 - Install libraries if not in the environment
     ``` sh
     pip install boto3
     pip install pandas
     ```
+
+In AWS save the `scryfall_json_path.json` in the bucket root or add it to a Variable.
 
 ## Usage
 

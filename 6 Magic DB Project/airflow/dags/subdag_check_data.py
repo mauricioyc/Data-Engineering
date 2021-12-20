@@ -54,7 +54,7 @@ def check_data_quality_dag(parent_dag_name,
     # ======= #
     table = "cards"
     primary_key = "card_id"
-    # task to count rows of songplays
+    # task to count rows of CARDS
     check_rows_cards = DataQualityOperator(
         task_id=f"check_rows_{table}",
         table=table,
@@ -62,7 +62,7 @@ def check_data_quality_dag(parent_dag_name,
         sql_query=check_rows_query.format(table=table),
         redshift_conn_id=redshift_conn_id
     )
-    # task to count nulls of userid
+    # task to count nulls of card_id
     check_pk_cards = DataQualityOperator(
         task_id=f"check_pk_{table}",
         table=table,
@@ -70,7 +70,7 @@ def check_data_quality_dag(parent_dag_name,
         sql_query=check_null_query.format(column=primary_key, table=table),
         redshift_conn_id=redshift_conn_id
     )
-    # task to check duplicated primary key on userid
+    # task to check duplicated primary key on card_id
     check_duplicated_cards = DataQualityOperator(
         task_id=f"check_duplicated_{table}",
         table=table,
@@ -85,7 +85,7 @@ def check_data_quality_dag(parent_dag_name,
     # ====== #
     table = "sets"
     primary_key = "set_id"
-    # task to count rows of songplays
+    # task to count rows of SETS
     check_rows_sets = DataQualityOperator(
         task_id=f"check_rows_{table}",
         table=table,
@@ -93,7 +93,7 @@ def check_data_quality_dag(parent_dag_name,
         sql_query=check_rows_query.format(table=table),
         redshift_conn_id=redshift_conn_id
     )
-    # task to count nulls of userid
+    # task to count nulls of set_id
     check_pk_sets = DataQualityOperator(
         task_id=f"check_pk_{table}",
         table=table,
@@ -101,7 +101,7 @@ def check_data_quality_dag(parent_dag_name,
         sql_query=check_null_query.format(column=primary_key, table=table),
         redshift_conn_id=redshift_conn_id
     )
-    # task to check duplicated primary key on userid
+    # task to check duplicated primary key on set_id
     check_duplicated_sets = DataQualityOperator(
         task_id=f"check_duplicated_{table}",
         table=table,
@@ -116,7 +116,7 @@ def check_data_quality_dag(parent_dag_name,
     # ======= #
     table = "artists"
     primary_key = "artist_id"
-    # task to count rows of songplays
+    # task to count rows of ARTISTS
     check_rows_artists = DataQualityOperator(
         task_id=f"check_rows_{table}",
         table=table,
@@ -124,7 +124,7 @@ def check_data_quality_dag(parent_dag_name,
         sql_query=check_rows_query.format(table=table),
         redshift_conn_id=redshift_conn_id
     )
-    # task to count nulls of userid
+    # task to count nulls of artist_id
     check_pk_artists = DataQualityOperator(
         task_id=f"check_pk_{table}",
         table=table,
@@ -132,7 +132,7 @@ def check_data_quality_dag(parent_dag_name,
         sql_query=check_null_query.format(column=primary_key, table=table),
         redshift_conn_id=redshift_conn_id
     )
-    # task to check duplicated primary key on userid
+    # task to check duplicated primary key on artist_id
     check_duplicated_artists = DataQualityOperator(
         task_id=f"check_duplicated_{table}",
         table=table,
@@ -147,7 +147,7 @@ def check_data_quality_dag(parent_dag_name,
     # ====== #
     table = "time"
     primary_key = "dt"
-    # task to count rows of songplays
+    # task to count rows of TIME
     check_rows_time = DataQualityOperator(
         task_id=f"check_rows_{table}",
         table=table,
@@ -155,7 +155,7 @@ def check_data_quality_dag(parent_dag_name,
         sql_query=check_rows_query.format(table=table),
         redshift_conn_id=redshift_conn_id
     )
-    # task to count nulls of userid
+    # task to count nulls of dt
     check_pk_time = DataQualityOperator(
         task_id=f"check_pk_{table}",
         table=table,
@@ -163,7 +163,7 @@ def check_data_quality_dag(parent_dag_name,
         sql_query=check_null_query.format(column=primary_key, table=table),
         redshift_conn_id=redshift_conn_id
     )
-    # task to check duplicated primary key on userid
+    # task to check duplicated primary key on dt
     check_duplicated_time = DataQualityOperator(
         task_id=f"check_duplicated_{table}",
         table=table,
@@ -178,7 +178,7 @@ def check_data_quality_dag(parent_dag_name,
     # ======== #
     table = "prices"
     primary_key = "prices_id"
-    # task to count rows of songplays
+    # task to count rows of PRICES
     check_rows_prices = DataQualityOperator(
         task_id=f"check_rows_{table}",
         table=table,
@@ -186,7 +186,7 @@ def check_data_quality_dag(parent_dag_name,
         sql_query=check_rows_query.format(table=table),
         redshift_conn_id=redshift_conn_id
     )
-    # task to count nulls of userid
+    # task to count nulls of prices_id
     check_pk_prices = DataQualityOperator(
         task_id=f"check_pk_{table}",
         table=table,

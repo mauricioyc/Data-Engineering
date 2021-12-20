@@ -6,7 +6,32 @@ from airflow.utils.decorators import apply_defaults
 
 
 class HttpOperator(BaseOperator):
+    """
+    Makes an API requests for a givin endpoint. If xcom flag is set to True,
+    the response is saved in the context.
 
+    Args:
+        endpoint (str): API endpoint.
+        method (str): Request method.
+        data (str): Data passed in the request.
+        headers (str): Headers passed in the request.
+        extra_options (obj): Extra options passed in the request.
+        xcom_push_flag (boolean): If True return the response to xcom.
+        http_conn_id (str): Connection id in Airflow connections.
+        *args: Arbitrary argument list.
+        **kwargs: Arbitrary keyword arguments.
+
+    Attributes:
+        endpoint (str): API endpoint.
+        method (str): Request method.
+        data (str): Data passed in the request.
+        headers (str): Headers passed in the request.
+        extra_options (obj): Extra options passed in the request.
+        xcom_push_flag (boolean): If True return the response to xcom.
+        http_conn_id (str): Connection id in Airflow connections.
+        *args: Arbitrary argument list.
+        **kwargs: Arbitrary keyword arguments.
+    """
     template_fields = ('endpoint', 'data', 'headers',)
     template_ext = ()
 
@@ -18,7 +43,6 @@ class HttpOperator(BaseOperator):
                  method='POST',
                  data=None,
                  headers=None,
-                 response_check=None,
                  extra_options=None,
                  xcom_push_flag=False,
                  http_conn_id='http_default',
@@ -33,11 +57,16 @@ class HttpOperator(BaseOperator):
         self.endpoint = endpoint
         self.headers = headers or {}
         self.data = data or {}
-        self.response_check = response_check
         self.extra_options = extra_options or {}
         self.xcom_push_flag = xcom_push_flag
 
     def execute(self, context):
+        """
+        Creates a Http Hook and get response from endpoint.
+
+        Args:
+            context (obj): context from run enviroment.
+        """
         http_hook = HttpHook(
             self.method, http_conn_id=self.http_conn_id)
 
